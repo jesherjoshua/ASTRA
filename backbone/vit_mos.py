@@ -431,25 +431,25 @@ class VisionTransformer(nn.Module):
                 self.attn_out_weight_sum[layer_idx].append(self.cur_adapter[layer_idx].attention.out_proj.weight.data)
                 self.attn_out_bias_sum[layer_idx].append(self.cur_adapter[layer_idx].attention.out_proj.bias.data)
 
-    def reweight_adapter(self, adapter, idx):
-        # adapter: original adapter
-        # idx: adapter idx
-        # this function is to reweight the adapter using momentum
-        momentum = self.config.adapter_momentum
-        if momentum == 0 or idx == 0:
-            return adapter
+    # def reweight_adapter(self, adapter, idx):
+    #     # adapter: original adapter
+    #     # idx: adapter idx
+    #     # this function is to reweight the adapter using momentum
+    #     momentum = self.config.adapter_momentum
+    #     if momentum == 0 or idx == 0:
+    #         return adapter
 
-        for layer_idx in range(len(self.blocks)):
-            adapter[layer_idx].down_proj.weight.data = (1 - momentum) * adapter[layer_idx].down_proj.weight.data \
-                                                                    + momentum * self.down_weight_sum[layer_idx][idx-1] / idx
-            adapter[layer_idx].down_proj.bias.data = (1 - momentum) * adapter[layer_idx].down_proj.bias.data \
-                                                                    + momentum * self.down_bias_sum[layer_idx][idx-1] / idx
-            adapter[layer_idx].up_proj.weight.data = (1 - momentum) * adapter[layer_idx].up_proj.weight.data \
-                                                                    + momentum * self.up_weight_sum[layer_idx][idx-1] / idx
-            adapter[layer_idx].up_proj.bias.data = (1 - momentum) * adapter[layer_idx].up_proj.bias.data \
-                                                                    + momentum * self.up_bias_sum[layer_idx][idx-1] / idx
-        # import pdb; pdb.set_trace()
-        return adapter
+    #     for layer_idx in range(len(self.blocks)):
+    #         adapter[layer_idx].down_proj.weight.data = (1 - momentum) * adapter[layer_idx].down_proj.weight.data \
+    #                                                                 + momentum * self.down_weight_sum[layer_idx][idx-1] / idx
+    #         adapter[layer_idx].down_proj.bias.data = (1 - momentum) * adapter[layer_idx].down_proj.bias.data \
+    #                                                                 + momentum * self.down_bias_sum[layer_idx][idx-1] / idx
+    #         adapter[layer_idx].up_proj.weight.data = (1 - momentum) * adapter[layer_idx].up_proj.weight.data \
+    #                                                                 + momentum * self.up_weight_sum[layer_idx][idx-1] / idx
+    #         adapter[layer_idx].up_proj.bias.data = (1 - momentum) * adapter[layer_idx].up_proj.bias.data \
+    #                                                                 + momentum * self.up_bias_sum[layer_idx][idx-1] / idx
+    #     # import pdb; pdb.set_trace()
+    #     return adapter
     
     def reweight_adapter(self, adapter, idx):
         momentum = self.config.adapter_momentum
