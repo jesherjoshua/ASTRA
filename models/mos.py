@@ -1282,6 +1282,7 @@ class Learner(BaseLearner):
     #     return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
 
         def _eval_cnn(self, loader):
+            print('in eval')
             start_time = time.time()
             self._network.eval()
             self.task_selector.eval()
@@ -1379,6 +1380,7 @@ class Learner(BaseLearner):
             elapsed_time = end_time - start_time
             self.eval_cnn_times.append(elapsed_time)
             avg_time = sum(self.eval_cnn_times) / len(self.eval_cnn_times)
+            print('outting eval')
         
             print(f"\n⏳ Time taken for _eval_cnn: {elapsed_time:.4f} seconds")
             print(f"📊 Average time for _eval_cnn calls: {avg_time:.4f} seconds")
