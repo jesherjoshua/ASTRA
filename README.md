@@ -1,51 +1,16 @@
-# MOS: Model Surgery for Pre-Trained Model-Based Class-Incremental Learning
+# ASTRA: Adaptive Single-pass Task Retrieval and Alignment for Pre Trained Model Based Class Incremental Learning
 
-<div align="center">
 
-<div>
-  <a href='http://www.lamda.nju.edu.cn/sunhl' target='_blank'>Hai-Long Sun</a><sup>1,2</sup>&emsp;
-    <a href='http://www.lamda.nju.edu.cn/zhoudw' target='_blank'>Da-Wei Zhou</a><sup>1,2</sup>&emsp;
-    <a href='https://scholar.google.com/citations?user=F2kiw10AAAAJ&hl=en' target='_blank'>Hanbin Zhao</a><sup>3</sup>&emsp;
-    <a href='https://scholar.google.com/citations?user=cCD5SDoAAAAJ&hl=en' target='_blank'>Le Gan</a><sup>1,2</sup>&emsp;
-    <a href='http://www.lamda.nju.edu.cn/zhandc' target='_blank'>De-Chuan Zhan</a><sup>1,2</sup>&emsp;
-    <a href='http://www.lamda.nju.edu.cn/yehj' target='_blank'>Han-Jia Ye</a><sup>1,2</sup>&emsp;
-</div>
-<div>
-
-  <sup>1</sup>School of Artificial Intelligence, Nanjing University&emsp;
-  <sup>2</sup>State Key Laboratory for Novel Software Technology, Nanjing University&emsp;
-  <sup>3</sup>College of Computer Science and Technology, Zhejiang University&emsp;
-
-</div>
-</div>
-<p align="center">
-  <a href=""><img src="https://img.shields.io/badge/MOS-v1.0-darkcyan"></a>
-  <a href='https://arxiv.org/abs/2412.09441'><img src='https://img.shields.io/badge/Arxiv-2412.09441-b31b1b.svg?logo=arXiv'></a>
-  <a href=""><img src="https://img.shields.io/github/stars/sun-hailong/AAAI25-MOS?color=4fb5ee"></a>
-  <a href=""><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fsun-hailong%2FAAAI25-MOS&count_bg=%23FFA500&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visitors&edge_flat=false"></a>
-</p>
-
-🎉The code repository for "[MOS: Model Surgery for Pre-Trained Model-Based Class-Incremental Learning](http://arxiv.org/abs/2412.09441)" (AAAI 2025) in PyTorch. If you use any content of this repo for your work, please cite the following bib entry:
-
-```
-  @inproceedings{sun2024mos,
-    title={MOS: Model Surgery for Pre-Trained Model-Based Class-Incremental Learning},
-    author={Sun, Hai-Long and Zhou, Da-Wei and Zhao, Hanbin and Gan, Le and Zhan, De-Chuan and Ye, Han-Jia},
-    booktitle={AAAI},
-    year={2025}
-  }
-```
+🎉The code repository for "ASTRA: Adaptive Single-pass Task Retrieval and Alignment for Pre Trained Model Based Class Incremental Learning" in PyTorch.
 
 ## Overview
-Class-Incremental Learning (CIL) requires models to continually acquire knowledge of new classes without forgetting old ones. Despite Pre-trained Models (PTMs) have shown excellent performance in CIL, catastrophic forgetting still occurs as the model learns new concepts. Existing work seeks to utilize lightweight components to adjust the PTM, while the forgetting phenomenon still comes from *parameter and retrieval* levels. Specifically, iterative updates of the model result in parameter drift, while mistakenly retrieving irrelevant modules leads to the mismatch during inference. 
-
-To this end, we propose MOdel Surgery (MOS) to rescue the model from forgetting previous knowledge. By training task-specific adapters, we continually adjust the PTM to downstream tasks. To mitigate parameter-level forgetting, we present an adapter merging approach to learn task-specific adapters, which aims to bridge the gap between different components while reserve task-specific information. Besides, to address retrieval-level forgetting, we introduce a training-free self-refined adapter retrieval mechanism during inference, which leverages the model's inherent ability for better adapter retrieval. By jointly rectifying the model with those steps, MOS can robustly resist catastrophic forgetting in the learning process. Extensive experiments on seven benchmark datasets validate MOS's state-of-the-art performance.
+Class Incremental Learning (CIL) with pre-trained models requires adapting to new tasks while mitigating catastrophic forgetting. Existing approaches address forgetting through replay-based methods that store past samples, regularization techniques, prompting strategies, and adapter-based methods. However, many of these methods rely on computationally expensive multi-pass self-refinement or require extensive memory. We propose ASTRA (Adaptive Single-pass Task Retrieval and Alignment), a more efficient framework that enhances feature refinement and streamlines task retrieval. ASTRA introduces shallow autoencoders with self-attention in the latent space to transfer only essential features and to eliminate iterative refinement, we introduce a Task Retrieval Network (TRN), enabling single-pass task alignment. ASTRA achieves competitive performance while being 2.46 times faster than the current state-of-the-art during inference, demonstrating its effectiveness for efficient and scalable class-incremental learning.
 
 <img src='resources/teaser.png' width='900'>
 
 ## 🎊 Results
 
-We conducted experiments on seven benchmark datasets to verify the competitive performance of MOS.
+We conducted experiments on seven benchmark datasets to verify the competitive performance of ASTRA.
 
 <img src='resources/result-img.png' width='900'>
 
@@ -82,15 +47,15 @@ python main.py --config ./exps/[filename].json
 
 if you want to run the cifar dataset using ViT-B/16-IN1K, you can follow the script: 
 ```
-python main.py --config ./exps/mos_cifar.json
+python main.py --config ./exps/astra_cifar.json
 ```
 
 if you want to run the cifar dataset using ViT-B/16-IN21K, you can follow the script: 
 ```
-python main.py --config ./exps/mos_cifar_in21k.json
+python main.py --config ./exps/astra_cifar_in21k.json
 ```
 
-After running the code, you will get a log file in the `logs/mos/cifar224/` folder.
+After running the code, you will get a log file in the `logs/astra/cifar224/` folder.
 
 ## 👨‍🏫 Acknowledgment
 
