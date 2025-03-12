@@ -6,16 +6,16 @@
 ## Overview
 Class Incremental Learning (CIL) with pre-trained models requires adapting to new tasks while mitigating catastrophic forgetting. Existing approaches address forgetting through replay-based methods that store past samples, regularization techniques, prompting strategies, and adapter-based methods. However, many of these methods rely on computationally expensive multi-pass self-refinement or require extensive memory. We propose ASTRA (Adaptive Single-pass Task Retrieval and Alignment), a more efficient framework that enhances feature refinement and streamlines task retrieval. ASTRA introduces shallow autoencoders with self-attention in the latent space to transfer only essential features and to eliminate iterative refinement, we introduce a Task Retrieval Network (TRN), enabling single-pass task alignment. ASTRA achieves competitive performance while being 2.46 times faster than the current state-of-the-art during inference, demonstrating its effectiveness for efficient and scalable class-incremental learning.
 
-<img src='resources/teaser.png' width='900'>
+<img src='teaser.png' width='900'>
 
 ## 🎊 Results
 
 We conducted experiments on seven benchmark datasets to verify the competitive performance of ASTRA.
-<img src='resources/result-dot.png' width='900'>
+<img src='result-dot.png' width='900'>
 
-<img src='resources/result-img.png' width='900'>
+<img src='result-img.png' width='900'>
 
-<img src='resources/result-table.png' width='900'>
+<img src='result-table.png' width='900'>
 
 ## Requirements
 ### 🗂️ Environment
