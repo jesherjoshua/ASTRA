@@ -11,6 +11,7 @@ Class Incremental Learning (CIL) with pre-trained models requires adapting to ne
 ## 🎊 Results
 
 We conducted experiments on seven benchmark datasets to verify the competitive performance of ASTRA.
+<img src='resources/result-dot.png' width='900'>
 
 <img src='resources/result-img.png' width='900'>
 
