@@ -1190,105 +1190,13 @@ class Learner(BaseLearner):
     #     return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
     
     
-    # def _eval_cnn(self, loader):
-    #     start_time = time.time()
-    #     self._network.eval()
-    #     self.task_selector.eval()
-    
-    #     y_pred, y_true = [], []
-    #     orig_y_pred = []
-    
-    #     for _, (_, inputs, targets) in enumerate(loader):
-    #         inputs = inputs.to(self._device)
-    #         with torch.no_grad():
-    #             # 🔹 Step 1: Get Predictions from Adapter 0 (Baseline)
-    #             orig_logits = self._network.forward_orig(inputs)["logits"][:, :self._total_classes]
-    #             orig_probs = F.softmax(orig_logits, dim=1)  # Convert to probabilities
-    #             orig_preds = torch.max(orig_logits, dim=1)[1].cpu().numpy()
-    #             orig_y_pred.append(orig_preds)
-    
-    #             # 🔹 Step 2: Extract Shared Features
-    #             shared_features = self._network.backbone(inputs)["features"]
-    
-    #             # 🔹 Step 3: Use Task Selector to Get Top-3 Adapters
-    #             task_probs = self.task_selector(shared_features)  # Shape: [B, num_tasks]
-    #             topk_adapters = torch.topk(task_probs, k=3, dim=1)  # Get top-3 adapters
-    #             adapter_indices = topk_adapters.indices  # Shape: [batch_size, 3]
-    
-    #             # 🔹 Step 4: Extract Features Using the Selected Adapter(s)
-    #             logits_list = []
-    #             for i in range(inputs.shape[0]):  # Iterate over the batch
-    #                 if self.ensemble:
-    #                     sample_logits = []
-    #                     for j in range(3):  # Top-3 adapters ensemble for abalation
-    #                         if int(adapter_indices[i, j].item()) < 0 or int(adapter_indices[i, j].item()) > self._cur_task:
-    #                             continue
-    #                         adapter_id = int(adapter_indices[i, j].item())
-    
-    #                         selected_features = self._network.backbone(
-    #                             inputs[i].unsqueeze(0),  
-    #                             adapter_id=adapter_id,  
-    #                             train=False
-    #                         )["features"]
-    
-    #                         logits = self._network.backbone(selected_features, fc_only=True)["logits"][:, :self._total_classes]
-    #                         sample_logits.append(logits)
-    
-    #                     # 🔹 Average logits across valid adapters (instead of weighted sum)
-    #                     logits_stack = torch.stack(sample_logits, dim=0)  # Shape: [num_valid_adapters, 1, num_classes]
-    #                     averaged_logits = logits_stack.mean(dim=0)  # Simple mean across adapters
-    #                     logits_list.append(averaged_logits)
-    #                 else: #single pass Top 1 adapter
-    #                     if int(adapter_indices[i, 0].item()) < 0 or int(adapter_indices[i, 0].item()) > self._cur_task:
-    #                         adapter_id=0
-    #                     else:
-    #                         adapter_id = int(adapter_indices[i, 0].item())
-                            
-    #                     selected_features = self._network.backbone(
-    #                         inputs[i].unsqueeze(0),  
-    #                         adapter_id=adapter_id,  
-    #                         train=False
-    #                     )["features"]
-    
-    #                     logits = self._network.backbone(selected_features, fc_only=True)["logits"][:, :self._total_classes]
-    #                     logits_list.append(logits)
-    
-    #             # 🔹 Stack logits to reconstruct the batch
-    #             final_logits = torch.cat(logits_list, dim=0).to(self._device)
-    
-    #             # 🔹 Step 5: Apply Softmax if Ensembling
-    #             if self.ensemble:
-    #                 final_logits = F.softmax(final_logits, dim=1)
-    #             outputs = final_logits
-    
-    #         # 🔹 Step 6: Get Final Predictions
-    #         predicts = torch.topk(outputs, k=self.topk, dim=1, largest=True, sorted=True)[1]
-    #         y_pred.append(predicts.cpu().numpy())
-    #         y_true.append(targets.cpu().numpy())
-    
-    #     # 🔹 Step 7: Compute Original Model Accuracy
-    #     orig_acc = (np.concatenate(orig_y_pred) == np.concatenate(y_true)).sum() * 100 / len(np.concatenate(y_true))
-    
-    #     # 🔹 Store execution time and calculate average
-    #     end_time = time.time()
-    #     elapsed_time = end_time - start_time
-    #     self.eval_cnn_times.append(elapsed_time)
-    #     avg_time = sum(self.eval_cnn_times) / len(self.eval_cnn_times)
-    
-    #     print(f"\n⏳ Time taken for _eval_cnn: {elapsed_time:.4f} seconds")
-    #     print(f"📊 Average time for _eval_cnn calls: {avg_time:.4f} seconds")
-    #     print("🎯 The accuracy of the original model: {}".format(np.around(orig_acc, 2)))
-    
-    #     return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
-
     def _eval_cnn(self, loader):
-        print('in eval')
         start_time = time.time()
         self._network.eval()
         self.task_selector.eval()
     
         y_pred, y_true = [], []
-        orig_y_pred, orig_probs_list, refined_probs_list = [], [], []
+        orig_y_pred = []
     
         for _, (_, inputs, targets) in enumerate(loader):
             inputs = inputs.to(self._device)
@@ -1298,7 +1206,6 @@ class Learner(BaseLearner):
                 orig_probs = F.softmax(orig_logits, dim=1)  # Convert to probabilities
                 orig_preds = torch.max(orig_logits, dim=1)[1].cpu().numpy()
                 orig_y_pred.append(orig_preds)
-                orig_probs_list.append(orig_probs.cpu().numpy())
     
                 # 🔹 Step 2: Extract Shared Features
                 shared_features = self._network.backbone(inputs)["features"]
@@ -1353,7 +1260,6 @@ class Learner(BaseLearner):
                 if self.ensemble:
                     final_logits = F.softmax(final_logits, dim=1)
                 outputs = final_logits
-                refined_probs_list.append(outputs.cpu().numpy())
     
             # 🔹 Step 6: Get Final Predictions
             predicts = torch.topk(outputs, k=self.topk, dim=1, largest=True, sorted=True)[1]
@@ -1363,33 +1269,127 @@ class Learner(BaseLearner):
         # 🔹 Step 7: Compute Original Model Accuracy
         orig_acc = (np.concatenate(orig_y_pred) == np.concatenate(y_true)).sum() * 100 / len(np.concatenate(y_true))
     
-        # 🔹 Print probabilities before and after refinement if ypred == ytrue
-        orig_probs = np.concatenate(orig_probs_list)
-        refined_probs = np.concatenate(refined_probs_list)
-        y_pred_arr = np.concatenate(y_pred)
-        y_true_arr = np.concatenate(y_true)
-    
-        for i in range(len(y_pred_arr)):
-            if y_pred_arr[i, 0] == y_true_arr[i]:  # Check top-1 prediction
-                print(f"✅ Match! y_true: {y_true_arr[i]}")
-                print("🔹 Top-5 Original Predictions and Probabilities:")
-                for label, prob in zip(np.argsort(orig_probs[i])[-5:][::-1], np.sort(orig_probs[i])[-5:][::-1]):
-                    print(f"    Label: {label}, Probability: {prob:.4f}")
-                print("🔹 Top-5 Refined Predictions and Probabilities:")
-                for label, prob in zip(np.argsort(refined_probs[i])[-5:][::-1], np.sort(refined_probs[i])[-5:][::-1]):
-                    print(f"    Label: {label}, Probability: {prob:.4f}")
-    
         # 🔹 Store execution time and calculate average
         end_time = time.time()
         elapsed_time = end_time - start_time
         self.eval_cnn_times.append(elapsed_time)
         avg_time = sum(self.eval_cnn_times) / len(self.eval_cnn_times)
-        print('outting eval')
     
         print(f"\n⏳ Time taken for _eval_cnn: {elapsed_time:.4f} seconds")
         print(f"📊 Average time for _eval_cnn calls: {avg_time:.4f} seconds")
         print("🎯 The accuracy of the original model: {}".format(np.around(orig_acc, 2)))
     
-        return y_pred_arr, y_true_arr  # [N, topk]
+        return np.concatenate(y_pred), np.concatenate(y_true)  # [N, topk]
+
+    # def _eval_cnn(self, loader):
+    #     print('in eval')
+    #     start_time = time.time()
+    #     self._network.eval()
+    #     self.task_selector.eval()
+    
+    #     y_pred, y_true = [], []
+    #     orig_y_pred, orig_probs_list, refined_probs_list = [], [], []
+    
+    #     for _, (_, inputs, targets) in enumerate(loader):
+    #         inputs = inputs.to(self._device)
+    #         with torch.no_grad():
+    #             # 🔹 Step 1: Get Predictions from Adapter 0 (Baseline)
+    #             orig_logits = self._network.forward_orig(inputs)["logits"][:, :self._total_classes]
+    #             orig_probs = F.softmax(orig_logits, dim=1)  # Convert to probabilities
+    #             orig_preds = torch.max(orig_logits, dim=1)[1].cpu().numpy()
+    #             orig_y_pred.append(orig_preds)
+    #             orig_probs_list.append(orig_probs.cpu().numpy())
+    
+    #             # 🔹 Step 2: Extract Shared Features
+    #             shared_features = self._network.backbone(inputs)["features"]
+    
+    #             # 🔹 Step 3: Use Task Selector to Get Top-3 Adapters
+    #             task_probs = self.task_selector(shared_features)  # Shape: [B, num_tasks]
+    #             topk_adapters = torch.topk(task_probs, k=3, dim=1)  # Get top-3 adapters
+    #             adapter_indices = topk_adapters.indices  # Shape: [batch_size, 3]
+    
+    #             # 🔹 Step 4: Extract Features Using the Selected Adapter(s)
+    #             logits_list = []
+    #             for i in range(inputs.shape[0]):  # Iterate over the batch
+    #                 if self.ensemble:
+    #                     sample_logits = []
+    #                     for j in range(3):  # Top-3 adapters ensemble for abalation
+    #                         if int(adapter_indices[i, j].item()) < 0 or int(adapter_indices[i, j].item()) > self._cur_task:
+    #                             continue
+    #                         adapter_id = int(adapter_indices[i, j].item())
+    
+    #                         selected_features = self._network.backbone(
+    #                             inputs[i].unsqueeze(0),  
+    #                             adapter_id=adapter_id,  
+    #                             train=False
+    #                         )["features"]
+    
+    #                         logits = self._network.backbone(selected_features, fc_only=True)["logits"][:, :self._total_classes]
+    #                         sample_logits.append(logits)
+    
+    #                     # 🔹 Average logits across valid adapters (instead of weighted sum)
+    #                     logits_stack = torch.stack(sample_logits, dim=0)  # Shape: [num_valid_adapters, 1, num_classes]
+    #                     averaged_logits = logits_stack.mean(dim=0)  # Simple mean across adapters
+    #                     logits_list.append(averaged_logits)
+    #                 else: #single pass Top 1 adapter
+    #                     if int(adapter_indices[i, 0].item()) < 0 or int(adapter_indices[i, 0].item()) > self._cur_task:
+    #                         adapter_id=0
+    #                     else:
+    #                         adapter_id = int(adapter_indices[i, 0].item())
+                            
+    #                     selected_features = self._network.backbone(
+    #                         inputs[i].unsqueeze(0),  
+    #                         adapter_id=adapter_id,  
+    #                         train=False
+    #                     )["features"]
+    
+    #                     logits = self._network.backbone(selected_features, fc_only=True)["logits"][:, :self._total_classes]
+    #                     logits_list.append(logits)
+    
+    #             # 🔹 Stack logits to reconstruct the batch
+    #             final_logits = torch.cat(logits_list, dim=0).to(self._device)
+    
+    #             # 🔹 Step 5: Apply Softmax if Ensembling
+    #             if self.ensemble:
+    #                 final_logits = F.softmax(final_logits, dim=1)
+    #             outputs = final_logits
+    #             refined_probs_list.append(outputs.cpu().numpy())
+    
+    #         # 🔹 Step 6: Get Final Predictions
+    #         predicts = torch.topk(outputs, k=self.topk, dim=1, largest=True, sorted=True)[1]
+    #         y_pred.append(predicts.cpu().numpy())
+    #         y_true.append(targets.cpu().numpy())
+    
+    #     # 🔹 Step 7: Compute Original Model Accuracy
+    #     orig_acc = (np.concatenate(orig_y_pred) == np.concatenate(y_true)).sum() * 100 / len(np.concatenate(y_true))
+    
+    #     # 🔹 Print probabilities before and after refinement if ypred == ytrue
+    #     orig_probs = np.concatenate(orig_probs_list)
+    #     refined_probs = np.concatenate(refined_probs_list)
+    #     y_pred_arr = np.concatenate(y_pred)
+    #     y_true_arr = np.concatenate(y_true)
+    
+    #     for i in range(len(y_pred_arr)):
+    #         if y_pred_arr[i, 0] == y_true_arr[i]:  # Check top-1 prediction
+    #             print(f"✅ Match! y_true: {y_true_arr[i]}")
+    #             print("🔹 Top-5 Original Predictions and Probabilities:")
+    #             for label, prob in zip(np.argsort(orig_probs[i])[-5:][::-1], np.sort(orig_probs[i])[-5:][::-1]):
+    #                 print(f"    Label: {label}, Probability: {prob:.4f}")
+    #             print("🔹 Top-5 Refined Predictions and Probabilities:")
+    #             for label, prob in zip(np.argsort(refined_probs[i])[-5:][::-1], np.sort(refined_probs[i])[-5:][::-1]):
+    #                 print(f"    Label: {label}, Probability: {prob:.4f}")
+    
+    #     # 🔹 Store execution time and calculate average
+    #     end_time = time.time()
+    #     elapsed_time = end_time - start_time
+    #     self.eval_cnn_times.append(elapsed_time)
+    #     avg_time = sum(self.eval_cnn_times) / len(self.eval_cnn_times)
+    #     print('outting eval')
+    
+    #     print(f"\n⏳ Time taken for _eval_cnn: {elapsed_time:.4f} seconds")
+    #     print(f"📊 Average time for _eval_cnn calls: {avg_time:.4f} seconds")
+    #     print("🎯 The accuracy of the original model: {}".format(np.around(orig_acc, 2)))
+    
+    #     return y_pred_arr, y_true_arr  # [N, topk]
 
     
