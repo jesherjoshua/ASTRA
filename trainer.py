@@ -142,7 +142,6 @@ def train(args):
 #         logging.info('Forgetting (NME): {}'.format(forgetting))
 
 def _train(args):
-    train_stage=0
     init_cls = 0 if args["init_cls"] == args["increment"] else args["init_cls"]
     logs_name = "logs/{}/{}/{}/{}".format(args["model_name"], args["dataset"], init_cls, args['increment'])
     
@@ -196,12 +195,10 @@ def _train(args):
         logging.info(
             "Trainable params: {}".format(count_parameters(model._network, True))
         )
-        if train_stage==0:
-            print("training only 1st task")
-            model.incremental_train(data_manager)
-            train_stage+=1
-        else:
-            print("skipped training for only few short scenario")
+
+        model.incremental_train(data_manager)
+
+
         cnn_accy, nme_accy = model.eval_task("accuracy")
         model.after_task()
 
