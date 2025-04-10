@@ -309,6 +309,7 @@ class Learner(BaseLearner):
         self._known_classes = self._total_classes
 
     def incremental_train(self, data_manager):
+       
         self._cur_task += 1
         self._total_classes = self._known_classes + data_manager.get_task_size(self._cur_task)
         
@@ -330,8 +331,9 @@ class Learner(BaseLearner):
         if len(self._multiple_gpus) > 1:
             print('Multiple GPUs')
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
-        
-        self._train(self.train_loader, self.test_loader)
+        if self._cur_task==0:
+            self._train(self.train_loader, self.test_loader)
+
         self.replace_fc()
         if len(self._multiple_gpus) > 1:
             self._network = self._network.module
