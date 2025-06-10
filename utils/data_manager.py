@@ -267,7 +267,7 @@ def _get_idata(dataset_name, args=None):
         return vtab()
     elif name == "vtab_imbalanced":
         return vtab_imbalanced(args)
-    elif name=="MedMNIST":
+    elif name=="medmnist":
         return MedMNIST()
     else:
         raise NotImplementedError("Unknown dataset {}.".format(dataset_name))
