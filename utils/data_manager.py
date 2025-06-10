@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
-from utils.data import iCIFAR10, iCIFAR100, iImageNet100, iImageNet1000, iCIFAR224, iImageNetR,iImageNetA,CUB, objectnet, omnibenchmark, vtab,iImageNetR_imbalanced, iCIFAR224_imbalanced,CUB_imbalanced, vtab_imbalanced
+from utils.data import iCIFAR10, iCIFAR100, iImageNet100, iImageNet1000, iCIFAR224, iImageNetR,iImageNetA,CUB, objectnet, omnibenchmark, vtab,iImageNetR_imbalanced, iCIFAR224_imbalanced,CUB_imbalanced, vtab_imbalanced, MedMNIST
 
 
 class DataManager(object):
@@ -267,7 +267,8 @@ def _get_idata(dataset_name, args=None):
         return vtab()
     elif name == "vtab_imbalanced":
         return vtab_imbalanced(args)
-
+    elif name=="MedMNIST":
+        return MedMNIST()
     else:
         raise NotImplementedError("Unknown dataset {}.".format(dataset_name))
 
