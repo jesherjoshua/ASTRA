@@ -422,6 +422,27 @@ class CUB(iData):
         self.train_data, self.train_targets = split_images_labels(train_dset.imgs)
         self.test_data, self.test_targets = split_images_labels(test_dset.imgs)
 
+
+class MedMNIST(iData):
+    use_path = True
+    
+    train_trsf = build_transform(True, None)
+    test_trsf = build_transform(False, None)
+    common_trsf = [    ]
+
+    class_order = np.arange(200).tolist()
+
+    def download_data(self):
+        # assert 0, "You should specify the folder of your dataset"
+        train_dir = "/kaggle/input/medmnist-merged-for-continual-learning/train/"
+        test_dir = "/kaggle/input/medmnist-merged-for-continual-learning/test/"
+
+        train_dset = datasets.ImageFolder(train_dir)
+        test_dset = datasets.ImageFolder(test_dir)
+
+        self.train_data, self.train_targets = split_images_labels(train_dset.imgs)
+        self.test_data, self.test_targets = split_images_labels(test_dset.imgs)
+
 class CUB_imbalanced(iData):
     def __init__(self, args, imbalance_ratio=0.25, imbalance_classes=None):
         super().__init__()
