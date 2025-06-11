@@ -331,8 +331,8 @@ class Learner(BaseLearner):
         if len(self._multiple_gpus) > 1:
             print('Multiple GPUs')
             self._network = nn.DataParallel(self._network, self._multiple_gpus)
-        if self._cur_task==0:
-            self._train(self.train_loader, self.test_loader)
+
+        self._train(self.train_loader, self.test_loader)
 
         self.replace_fc()
         if len(self._multiple_gpus) > 1:
