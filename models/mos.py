@@ -14,7 +14,7 @@ import time
 
 
 # tune the model at first session with vpt, and then conduct simple shot.
-num_workers = 8
+num_workers = 4
 from collections import defaultdict
 
 
