@@ -14,7 +14,7 @@
     "imb_metrics": false,
     "tuned_epoch": 4,
     "init_lr": 0.01,
-    "batch_size": 16,
+    "batch_size": 8,
     "weight_decay": 0.0005,
     "min_lr": 0,
     "optimizer": "sgd",
