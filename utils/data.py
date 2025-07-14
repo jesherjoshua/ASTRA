@@ -434,8 +434,8 @@ class MedMNIST(iData):
 
     def download_data(self):
         # assert 0, "You should specify the folder of your dataset"
-        train_dir = "/kaggle/input/medmnist-merged-for-continual-learning/train/"
-        test_dir = "/kaggle/input/medmnist-merged-for-continual-learning/test/"
+        train_dir = "/kaggle/input/medmnist-halft/train/"
+        test_dir = "/kaggle/input/medmnist-halft/test/"
 
         train_dset = datasets.ImageFolder(train_dir)
         test_dset = datasets.ImageFolder(test_dir)
